@@ -2,12 +2,15 @@ import os
 import re
 import fileinput
 
-keywords = ['Auth', 'Audit', 'Mail', 'User', 'Account', 'ClientForward', 'Logout', 'package-info']
+keywords = ['Auth', 'Audit', 'Mail', 'User', 'Account', 'ClientForward', 'Logout', 'package-info', 'EmailAlreadyUsedException', 'InvalidPasswordException']
 
-base = input("Enter base package name: ")
+base = "org.infy.stg.pdx"#input("Enter base package name: ")
 base_path = base.replace('.', '/')
-ext = input("Enter ext folder name: ")
+ext = "ext"#input("Enter ext folder name: ")
 ext_dir = base_path + "/" + ext
+
+root = os.getcwd()
+os.chdir("src/main/java/")
 
 base_dir_rep = base_path + "/repository"
 ext_dir_rep = ext_dir + "/repository"
@@ -68,13 +71,13 @@ for f in files:
         t.close()
         n = f.replace(".java", "")
         contents = contents.replace("package " + base, "package " + base + "." + ext)
-        contents = contents.replace("import " + base + ".service", "package " + base + "." + ext + ".service", 1)
-        contents = contents.replace("import " + base + ".repository", "package " + base + "." + ext + ".repository", 1)
-        contents = contents.replace("extends", "extends " + base + ".service.impl." + n)
+        contents = contents.replace("import " + base + ".service", "import org.springframework.context.annotation.Primary;\nimport " + base + "." + ext + ".service", 1)
+        contents = contents.replace("import " + base + ".repository", "import " + base + "." + ext + ".repository", 1)
+        contents = contents.replace("implements", "extends " + base + ".service.impl." + n + " implements")
         contents = contents.replace("@Service", '@Primary\n@Service("' + f.replace("Impl.java", "") + '")')
         contents = re.sub(r'}\n.*}', "}\n}", contents, flags=re.DOTALL)
         res = re.search(n + r'\((.*?)\)', contents).group(1)
-        s = "super(" 
+        s = "super("
         args = res.split(", ")
         for arg in args:
             s = s + arg.split()[1] + ", "
@@ -104,12 +107,13 @@ for f in files:
         bckup = contents
 
         n = f.replace(".java", "")
+        contents = contents.replace("@RequestMapping(\"/api\")", "@RestController(\"" + n + "\")\n@RequestMapping(\"/api\")")
         contents = contents.replace("package " + base, "package " + base + "." + ext)
         contents = contents.replace("import " + base + ".service", "import " + base + "." + ext + ".service", 1)
-        contents = contents.replace("extends", "extends " + base + ".web.rest." + n)
+        contents = contents.replace("class " + n, "class " + n + " extends " + base + ".web.rest." + n)
         contents = re.sub(r'}\n.*}', "}\n}", contents, flags=re.DOTALL)
         res = re.search(n + r'\((.*?)\)', contents).group(1)
-        s = "super(" 
+        s = "super("
         args = res.split(", ")
         for arg in args:
             s = s + arg.split()[1] + ", "
@@ -125,5 +129,31 @@ for f in files:
         t.write(bckup.replace("@RestController", ""))
         t.close()
 
-print("Please check the generated files and paste the following in your App class")
-print('@EnableJpaRepositories("' + base + '.' + ext + '")\n@ComponentScan({"' + base + '", "' + base + '.' + ext + '"})')
+
+files = os.listdir(base_path)
+print("----Analyzing App...")
+idx = 0
+for f in files:
+    if f.endswith("App.java") and not any(keyword in f for keyword in keywords) :
+        idx = idx + 1
+        print(str(idx) + ". Detected: " + f)
+        t = open(base_path + "/" + f, "r")
+        contents = t.read()
+        t.close()
+
+        bckup = contents
+
+        n = f.replace(".java", "")
+
+        if "EnableJpaRepositories" in contents:
+            continue
+
+        contents = contents.replace("import org.springframework.core.env.Environment;","import org.springframework.context.annotation.ComponentScan;\nimport org.springframework.core.env.Environment;\nimport org.springframework.data.jpa.repository.config.EnableJpaRepositories;")
+        contents = contents.replace("public class", '@EnableJpaRepositories("' + base + '.' + ext + '")\n@ComponentScan({"' + base + '", "' + base + '.' + ext + '"})' + "\npublic class")
+
+        t = open(base_path + "/" + f, "w")
+        t.write(contents)
+        t.close()
+
+os.rename(ext_dir, root + "/" + ext)
+os.symlink(root + "/" + ext, ext_dir)
