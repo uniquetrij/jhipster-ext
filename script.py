@@ -1,6 +1,7 @@
 import os
 import re
 import fileinput
+import shutil
 
 keywords = ['Auth', 'Audit', 'Mail', 'User', 'Account', 'ClientForward', 'Logout', 'package-info', 'EmailAlreadyUsedException', 'InvalidPasswordException']
 
@@ -155,5 +156,17 @@ for f in files:
         t.write(contents)
         t.close()
 
-os.rename(ext_dir, root + "/" + ext)
+def remove(path):
+    """ param <path> could either be relative or absolute. """
+    if os.path.isfile(path) or os.path.islink(path):
+        os.remove(path)  # remove the file
+    elif os.path.isdir(path):
+        shutil.rmtree(path)  # remove dir and all contains
+    else:
+        raise ValueError("file {} is not a file or dir.".format(path))
+
+try:
+    os.rename(ext_dir, root + "/" + ext)
+except:
+    remove(ext_dir)
 os.symlink(root + "/" + ext, ext_dir)
