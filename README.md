@@ -23,6 +23,13 @@ If you want to ignore the base apis, remove `@RestController` annotation from th
 9. Modify all imports for `repository`, `service`, `impl` and `web.rest` in ext package to import from ext and not from base classes.
 
 # Automating The Entire Pipeline
-You may use [script.py](https://github.com/uniquetrij/jhipster-ext/edit/master/script.py) to automate the entire process described above. To do this you need to run the script from the project root, i.e in the folder that contains the `src` folder. Make sure your `x` folder name do not conflict with an existing folder in the project root. 
+You may use [script.py](https://github.com/uniquetrij/jhipster-ext/edit/master/script.py) to automate the entire process described above. To do this you need to run the script from the project root, i.e in the folder that contains the `src` folder and pass in the base package name and x folder name. 
+```bash
+script.py <fully qualified base package name> <ext folder name>
+```
+Make sure your `x` folder name do not conflict with an existing folder in the project root. 
 
-
+##Example
+```bash
+script.py org.jhipster x
+```
