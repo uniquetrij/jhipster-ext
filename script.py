@@ -2,16 +2,22 @@ import os
 import re
 import fileinput
 import shutil
+import sys
 
 keywords = ['Auth', 'Audit', 'Mail', 'User', 'Account', 'ClientForward', 'Logout', 'package-info', 'EmailAlreadyUsedException', 'InvalidPasswordException']
 
-base = "org.infy.stg.pdx"#input("Enter base package name: ")
+base = sys.argv[1]
 base_path = base.replace('.', '/')
-ext = "ext"#input("Enter ext folder name: ")
+ext = sys.argv[2]
 ext_dir = base_path + "/" + ext
 
 root = os.getcwd()
 os.chdir("src/main/java/")
+
+try:
+    os.remove(ext_dir)
+except:
+    pass
 
 base_dir_rep = base_path + "/repository"
 ext_dir_rep = ext_dir + "/repository"
@@ -165,8 +171,20 @@ def remove(path):
     else:
         raise ValueError("file {} is not a file or dir.".format(path))
 
+def copy(src, dst):
+    l = os.listdir(dst)
+    for f in os.listdir(src):
+        if os.path.isdir(os.path.join(src, f)):
+            copy(os.path.join(src, f), os.path.join(dst, f))
+        elif f not in l:
+            os.rename(os.path.join(src, f), os.path.join(dst, f))
+
 try:
     os.rename(ext_dir, root + "/" + ext)
 except:
+    copy(ext_dir, root + "/" + ext)
     remove(ext_dir)
 os.symlink(root + "/" + ext, ext_dir)
+
+# print("Please check the generated files and paste the following in your App class")
+# print('@EnableJpaRepositories("' + base + '.' + ext + '")\n@ComponentScan({"' + base + '", "' + base + '.' + ext + '"})')
