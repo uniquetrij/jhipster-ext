@@ -114,6 +114,7 @@ for f in files:
         bckup = contents
 
         n = f.replace(".java", "")
+        contents = contents.replace("@RestController", "")
         contents = contents.replace("@RequestMapping(\"/api\")", "@RestController(\"" + n + "\")\n@RequestMapping(\"/api\")")
         contents = contents.replace("package " + base, "package " + base + "." + ext)
         contents = contents.replace("import " + base + ".service", "import " + base + "." + ext + ".service", 1)
