@@ -6,9 +6,17 @@ import sys
 
 keywords = ['Auth', 'Audit', 'Mail', 'User', 'Account', 'ClientForward', 'Logout', 'package-info', 'EmailAlreadyUsedException', 'InvalidPasswordException']
 
-base = sys.argv[1]
-base_path = base.replace('.', '/')
-ext = sys.argv[2]
+try:
+    base = sys.argv[1]
+except:
+    import xml.etree.ElementTree as ET
+    base = ET.parse('pom.xml').getroot().find('{*}groupId').text
+try:
+    ext = sys.argv[2]
+except:
+    ext = "ext"
+
+base_path = base.replace('.', '/')    
 ext_dir = base_path + "/" + ext
 
 root = os.getcwd()
