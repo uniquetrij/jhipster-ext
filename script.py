@@ -93,7 +93,7 @@ for f in files:
         contents = re.sub(r'}\n.*}', "}\n}", contents, flags=re.DOTALL)
         res = re.search(n + r'\(((.|\n)*?)\)', contents).group(1)
         s = "super("
-        args = res.split(", ")
+        args = res.split(",")
         for arg in args:
             s = s + arg.split()[1] + ", "
         if len(args) > 0:
@@ -130,7 +130,7 @@ for f in files:
         contents = re.sub(r'}\n.*}', "}\n}", contents, flags=re.DOTALL)
         res = re.search(n + r'\(((.|\n)*?)\)', contents).group(1)
         s = "super("
-        args = res.split(", ")
+        args = res.split(",")
         for arg in args:
             s = s + arg.split()[1] + ", "
         if len(args) > 0:
