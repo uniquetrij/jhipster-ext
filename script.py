@@ -16,7 +16,7 @@ try:
 except:
     ext = "ext"
 
-base_path = base.replace('.', '/')    
+base_path = base.replace('.', '/')
 ext_dir = base_path + "/" + ext
 
 root = os.getcwd()
@@ -91,7 +91,7 @@ for f in files:
         contents = contents.replace("implements", "extends " + base + ".service.impl." + n + " implements")
         contents = contents.replace("@Service", '@Primary\n@Service("' + f.replace("Impl.java", "") + '")')
         contents = re.sub(r'}\n.*}', "}\n}", contents, flags=re.DOTALL)
-        res = re.search(n + r'\((.*?)\)', contents).group(1)
+        res = re.search(n + r'\(((.|\n)*?)\)', contents).group(1)
         s = "super("
         args = res.split(", ")
         for arg in args:
@@ -128,7 +128,7 @@ for f in files:
         contents = contents.replace("import " + base + ".service", "import " + base + "." + ext + ".service", 1)
         contents = contents.replace("class " + n, "class " + n + " extends " + base + ".web.rest." + n)
         contents = re.sub(r'}\n.*}', "}\n}", contents, flags=re.DOTALL)
-        res = re.search(n + r'\((.*?)\)', contents).group(1)
+        res = re.search(n + r'\(((.|\n)*?)\)', contents).group(1)
         s = "super("
         args = res.split(", ")
         for arg in args:
