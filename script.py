@@ -176,9 +176,14 @@ for f in files:
         t.close()
         
 
-shutil.move(ext_dir, root + "/" + ext)
-
 try:
-    os.symlink(root + "/" + ext, ext_dir)
+    shutil.move(ext_dir, root + "/" + ext)
+    try:
+        os.symlink(root + "/" +ext, ext_dir)
+    except:
+        print("----Symlink Failed...");
+        shutil.move(root + "/" + ext, ext_dir)
 except:
-    shutil.move(root + "/" + ext, ext_dir)
+    print("An ext folder is already present in the project root")
+
+
