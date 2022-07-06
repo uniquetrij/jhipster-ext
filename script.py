@@ -188,12 +188,16 @@ def copy(src, dst):
         elif f not in l:
             os.rename(os.path.join(src, f), os.path.join(dst, f))
 
-try:
-    os.rename(ext_dir, root + "/" + ext)
-except:
-    copy(ext_dir, root + "/" + ext)
-    remove(ext_dir)
-os.symlink(root + "/" + ext, ext_dir)
+def move(src, dst):
+    try:
+        os.rename(src, dst)
+    except:
+        copy(src, dst)
+        remove(src)
 
-# print("Please check the generated files and paste the following in your App class")
-# print('@EnableJpaRepositories("' + base + '.' + ext + '")\n@ComponentScan({"' + base + '", "' + base + '.' + ext + '"})')
+move(ext_dir, root + "/" + ext)
+
+try:
+    os.symlink(root + "/" + ext, ext_dir)
+except:
+    move(root + "/" + ext, ext_dir)
