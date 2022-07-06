@@ -23,7 +23,11 @@ root = os.getcwd()
 os.chdir("src/main/java/")
 
 try:
-    os.remove(ext_dir)
+    os.unlink(ext_dir)
+    if os.path.isfile(ext_dir):
+        os.remove(ext_dir)
+    else:
+        os.rmdir(ext_dir)
 except:
     pass
 
@@ -170,34 +174,11 @@ for f in files:
         t = open(base_path + "/" + f, "w")
         t.write(contents)
         t.close()
+        
 
-def remove(path):
-    """ param <path> could either be relative or absolute. """
-    if os.path.isfile(path) or os.path.islink(path):
-        os.remove(path)  # remove the file
-    elif os.path.isdir(path):
-        shutil.rmtree(path)  # remove dir and all contains
-    else:
-        raise ValueError("file {} is not a file or dir.".format(path))
-
-def copy(src, dst):
-    l = os.listdir(dst)
-    for f in os.listdir(src):
-        if os.path.isdir(os.path.join(src, f)):
-            copy(os.path.join(src, f), os.path.join(dst, f))
-        elif f not in l:
-            os.rename(os.path.join(src, f), os.path.join(dst, f))
-
-def move(src, dst):
-    try:
-        os.rename(src, dst)
-    except:
-        copy(src, dst)
-        remove(src)
-
-move(ext_dir, root + "/" + ext)
+shutil.move(ext_dir, root + "/" + ext)
 
 try:
     os.symlink(root + "/" + ext, ext_dir)
 except:
-    move(root + "/" + ext, ext_dir)
+    shutil.move(root + "/" + ext, ext_dir)
