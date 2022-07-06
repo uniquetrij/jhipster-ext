@@ -1,8 +1,20 @@
 import os
 import re
 import fileinput
-import shutil
+import shutil 
 import sys
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[
+        logging.FileHandler("debug.log"),
+        logging.StreamHandler(sys.stdout)
+    ]
+)
+
+log = logging.getLogger("script")
 
 keywords = ['Auth', 'Audit', 'Mail', 'User', 'Account', 'ClientForward', 'Logout', 'package-info', 'EmailAlreadyUsedException', 'InvalidPasswordException']
 
@@ -34,12 +46,12 @@ except:
 base_dir_rep = base_path + "/repository"
 ext_dir_rep = ext_dir + "/repository"
 files = os.listdir(base_dir_rep)
-print("----Analyzing repositories...")
+log.info("<Analyzing Repositories>")
 idx = 0
 for f in files:
     if f.endswith(".java") and not any(keyword in f for keyword in keywords) :
         idx = idx + 1
-        print(str(idx) + ". Detected: " + f)
+        log.info(str(idx) + ". Detected: " + f)
         if not os.path.exists(ext_dir_rep):
             os.makedirs(ext_dir_rep)
         t = open(base_dir_rep + "/" + f, "r")
@@ -55,12 +67,12 @@ for f in files:
 base_dir_ser = base_path + "/service"
 ext_dir_ser = ext_dir + "/service"
 files = os.listdir(base_dir_ser)
-print("----Analyzing services...")
+log.info("<Analyzing Services>")
 idx = 0
 for f in files:
     if f.endswith(".java") and not any(keyword in f for keyword in keywords) :
         idx = idx + 1
-        print(str(idx) + ". Detected: " + f)
+        log.info(str(idx) + ". Detected: " + f)
         if not os.path.exists(ext_dir_ser):
             os.makedirs(ext_dir_ser)
         t = open(base_dir_ser + "/" + f, "r")
@@ -77,12 +89,12 @@ for f in files:
 base_dir_ser_impl = base_path + "/service/impl"
 ext_dir_ser_impl = ext_dir + "/service/impl"
 files = os.listdir(base_dir_ser_impl)
-print("----Analyzing service implementations...")
+log.info("Analyzing ServiceImpls>")
 idx = 0
 for f in files:
     if f.endswith(".java") and not any(keyword in f for keyword in keywords) :
         idx = idx + 1
-        print(str(idx) + ". Detected: " + f)
+        log.info(str(idx) + ". Detected: " + f)
         if not os.path.exists(ext_dir_ser_impl):
             os.makedirs(ext_dir_ser_impl)
         t = open(base_dir_ser_impl + "/" + f, "r")
@@ -111,12 +123,12 @@ for f in files:
 base_dir_web_rest = base_path + "/web/rest"
 ext_dir_web_rest = ext_dir + "/web/rest"
 files = os.listdir(base_dir_web_rest)
-print("----Analyzing web resources...")
+log.info("<Analyzing WebRest>")
 idx = 0
 for f in files:
     if f.endswith(".java") and not any(keyword in f for keyword in keywords) :
         idx = idx + 1
-        print(str(idx) + ". Detected: " + f)
+        log.info(str(idx) + ". Detected: " + f)
         if not os.path.exists(ext_dir_web_rest):
             os.makedirs(ext_dir_web_rest)
         t = open(base_dir_web_rest + "/" + f, "r")
@@ -151,12 +163,12 @@ for f in files:
 
 
 files = os.listdir(base_path)
-print("----Analyzing App...")
+log.info("<Analyzing App>")
 idx = 0
 for f in files:
     if f.endswith("App.java") and not any(keyword in f for keyword in keywords) :
         idx = idx + 1
-        print(str(idx) + ". Detected: " + f)
+        log.info(str(idx) + ". Detected: " + f)
         t = open(base_path + "/" + f, "r")
         contents = t.read()
         t.close()
@@ -175,15 +187,20 @@ for f in files:
         t.write(contents)
         t.close()
         
-
-try:
+log.info("<<<Analysis Completed>>>")
+        
+if os.path.isdir(root + "/" + ext):
+    log.info("EXT@ROOT exists. Removing EXT@SRC")
+    shutil.rmtree(ext_dir)
+else:
     shutil.move(ext_dir, root + "/" + ext)
-    try:
-        os.symlink(root + "/" +ext, ext_dir)
-    except:
-        print("----Symlink Failed...");
-        shutil.move(root + "/" + ext, ext_dir)
+    log.info("Moved EXT@SRC to EXT@ROOT")
+        
+try:
+    os.symlink(root + "/" +ext, ext_dir)
+    log.info("Symlink created EXT@SRC => EXT@ROOT")
 except:
-    print("An ext folder is already present in the project root")
+    log.info("Symlink failed. Moving EXT@ROOT to EXT@SRC")
+    shutil.move(root + "/" + ext, ext_dir)
 
 
