@@ -1,7 +1,7 @@
 import os
 import re
 import fileinput
-import shutil 
+import shutil
 import sys
 import logging
 
@@ -18,6 +18,8 @@ log = logging.getLogger("script")
 
 keywords = ['Auth', 'Audit', 'Mail', 'User', 'Account', 'ClientForward', 'Logout', 'package-info', 'EmailAlreadyUsedException', 'InvalidPasswordException']
 
+java_dir = "src/main/java/"
+
 try:
     base = sys.argv[1]
 except:
@@ -32,7 +34,7 @@ base_path = base.replace('.', '/')
 ext_dir = base_path + "/" + ext
 
 root = os.getcwd()
-os.chdir("src/main/java/")
+os.chdir(java_dir)
 
 try:
     os.unlink(ext_dir)
@@ -186,21 +188,25 @@ for f in files:
         t = open(base_path + "/" + f, "w")
         t.write(contents)
         t.close()
-        
+
 log.info("<<<Analysis Completed>>>")
-        
+
 if os.path.isdir(root + "/" + ext):
     log.info("EXT@ROOT exists. Removing EXT@SRC")
     shutil.rmtree(ext_dir)
 else:
     shutil.move(ext_dir, root + "/" + ext)
     log.info("Moved EXT@SRC to EXT@ROOT")
-        
+
 try:
-    os.symlink(root + "/" +ext, ext_dir)
+    import re
+    symlink = re.sub('[a-z]*', '.', java_dir + ext_dir.replace("/ext","")) + "/ext"
+    symlink = symlink.replace("/", os.sep)
+    os.symlink(symlink, ext_dir)
     log.info("Symlink created EXT@SRC => EXT@ROOT")
 except:
     log.info("Symlink failed. Moving EXT@ROOT to EXT@SRC")
     shutil.move(root + "/" + ext, ext_dir)
+
 
 
