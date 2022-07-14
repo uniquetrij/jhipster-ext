@@ -40,10 +40,13 @@ try:
     os.unlink(ext_dir)
     if os.path.isfile(ext_dir):
         os.remove(ext_dir)
-    else:
+    elif os.path.isdir(ext_dir):
         os.rmdir(ext_dir)
 except:
-    pass
+    if os.path.isfile(ext_dir):
+        os.remove(ext_dir)
+    elif os.path.isdir(ext_dir):
+        raise Exception("EXT@SRC exists. Leaving unmodified. Exiting.")
 
 base_dir_rep = base_path + "/repository"
 ext_dir_rep = ext_dir + "/repository"
@@ -207,6 +210,3 @@ try:
 except:
     log.info("Symlink failed. Moving EXT@ROOT to EXT@SRC")
     shutil.move(root + "/" + ext, ext_dir)
-
-
-
